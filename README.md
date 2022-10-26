@@ -1,2 +1,2 @@
 # TSCB-CCV
-Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata packages
+Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata package
