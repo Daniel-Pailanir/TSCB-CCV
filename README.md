@@ -1,7 +1,7 @@
 # TSCB
 Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata package
 
-[TSCB.do](TSCB.do) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. For the moment we consider the case $q_k=1$ following algorithm 1 of [Abadie et al (2022)](#references).
+[tscb.ado](tscb.ado) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. For the moment we consider the case $q_k=1$ and $\frac{1}{q_k}=c$ where $c$ is an integer. We following algorithm 1 of [Abadie et al (2022)](#references).
 
 We provide an example using the data availble from the paper:
 
@@ -56,11 +56,13 @@ Two-Stage Cluster Bootstrap (TSCB):
 ```
 
 
+> :warning: **At the moment the procedure with covariates is not available**: Be very careful here!
+
 # CCV
-CCV -- work in progress
+CCV - work in progress
 
 
 # References
-Alberto Abadie, Susan Athey, Guido W Imbens, Jeffrey M Wooldridge, **When Should You Adjust Standard Errors for Clustering?**, The Quarterly Journal of Economics, 2022.
+**When Should You Adjust Standard Errors for Clustering?**, Alberto Abadie, Susan Athey, Guido W Imbens, Jeffrey M Wooldridge, The Quarterly Journal of Economics, 2022.
 
 
