@@ -1,7 +1,7 @@
 # TSCB
 Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata package
 
-[TCSB.do](TCSB.do) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. For the moment we consider the case $q_k=1$ following algorithm 1 of [Abadie et al (2022)](#references).
+[TSCB.do](TSCB.do) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. For the moment we consider the case $q_k=1$ following algorithm 1 of [Abadie et al (2022)](#references).
 
 We provide an example using the data availble from the paper:
 
