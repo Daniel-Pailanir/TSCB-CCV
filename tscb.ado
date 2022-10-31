@@ -92,7 +92,7 @@ while `b'<=`reps' {
     mata: SS   = J(`S',1,NULL) 
     mata: SSTU = J(1,3,.) 
 
-    forval i=1/`rs' {		
+    forval i=1/`S' {		
         //base para la regresion
         mata: SS[`i']=SSample(Data2, States, SST, SSU, `i')
         mata: SSTU=(SSTU\(*SS[`i']))
