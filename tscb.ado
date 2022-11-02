@@ -37,7 +37,14 @@ local names : colfullnames e(b)
 
 local qm=1/`qk'
 if mod(`qm',1)==0 {
-    di "1/q_k is an integer, so we expand the data by `qm' for each cluster"
+    if `qm'!=1 di as text "1/q is an integer, so we expand the data by `qm' for each cluster"
+}
+
+if mod(`qm',1)!=0 {
+    local f=floor(`qm')
+    local alpha=1-(`qm'-`f')
+    local qm=`f'+1
+    di as text "1/q is not an integer, so we expand the data by `f' or `qm' for each cluster"
 }
 
 *------------------------------------------------------------------------------*
@@ -51,12 +58,15 @@ local S=`rs'*`qm'
 
 mata: States = J(`S',1,NULL)
 local i=1
+
+local m=0
 forval r=1/`qm' {
+    if `r'>1 local ++m
     forval s=1/`rs' {
         qui putmata S`i'=(`3' `1' `2') if `3'==`s', replace
         mata: States[`i'] = &(S`i')
         if `i'>`s' {
-            mata: (*States[`i'])[,1] = (*States[`i'])[,1]:+`rs'
+            mata: (*States[`i'])[,1] = (*States[`i'])[,1]:+`m'*`rs'
         }
         local ++i
     }
@@ -92,9 +102,28 @@ while `b'<=`reps' {
     mata: SS   = J(`S',1,NULL) 
     mata: SSTU = J(1,3,.) 
 
-    forval i=1/`S' {		
+    if `qk'==1 {
+        local upperS=`S'
+        mata: newi=Data[,1]
+    }
+    else {
+        local upperS=`rs'
+        local M=`S'
+		
+        if mod(1/`qk',1)!=0 {
+            mata: ud=rdiscrete(1, 1, (`alpha',1-`alpha'))
+            mata: st_local("ud", strofreal(ud))
+            if `ud'==1 local M=`f'*`rs'
+            else       local M=`qm'*`rs'		
+        }
+		
+        mata: newi=sort(SSelect(`M', `rs', Data[1..`M',1]),1)
+    }
+
+    forval i=1/`upperS' {		
         //base para la regresion
-        mata: SS[`i']=SSample(Data2, States, SST, SSU, `i')
+        mata: i=newi[`i',1]
+        mata: SS[`i']=SSample(Data2, States, SST, SSU, i)
         mata: SSTU=(SSTU\(*SS[`i']))
     }
 	
@@ -158,6 +187,14 @@ mata:
     SS=&((*SST[i])\(*SSU[i]))
 	
     return(SS)
+    }
+end
+
+mata: 
+    real vector SSelect(S, rs, D) {
+    index=(runiform(S,1),D)
+    s=sort(index,-1)[1..rs,2]
+    return(s)
     }
 end
 
