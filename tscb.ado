@@ -32,8 +32,9 @@ if "`commandline'"=="" {
     di as error "estimate not found"
 }
 
-local rank=e(rank)
+*local rank=e(rank)
 *local names : colfullnames e(b)
+local rank=2
 local names "W cons"
 
 local qm=1/`qk'
