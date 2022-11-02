@@ -1,0 +1,7 @@
+v 1.0.0
+d 'TSCB': Two-Stage Cluster Bootstrap
+d 
+d Distribution-Date:   2022-11-02
+d License: GNU v3.0
+d 
+F tscb.ado
