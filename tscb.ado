@@ -33,7 +33,8 @@ if "`commandline'"=="" {
 }
 
 local rank=e(rank)
-local names : colfullnames e(b)
+*local names : colfullnames e(b)
+local names "W cons"
 
 local qm=1/`qk'
 if mod(`qm',1)==0 {
@@ -132,7 +133,10 @@ while `b'<=`reps' {
     getmata (`3' `1' `2')=SSTU
     qui drop if `3'==.
     qui `commandline'
-    mata: Betas[`b',]=st_matrix("e(b)")
+    local tau=_b[`2']
+    local c=_b[_cons]
+    *mata: Betas[`b',]=st_matrix("e(b)")
+    mata: Betas[`b',]=(`tau',`c')
     local ++b
 }
 restore
