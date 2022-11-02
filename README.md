@@ -1,3 +1,5 @@
+![Stata](https://img.shields.io/badge/stata-2013-green) ![GitHub Starts](https://img.shields.io/github/stars/Daniel-Pailanir/tscb-ccv?style=social) ![GitHub license](https://img.shields.io/github/license/Daniel-Pailanir/sdid)
+
 # TSCB
 Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata package
 
