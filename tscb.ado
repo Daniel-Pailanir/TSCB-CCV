@@ -1,15 +1,11 @@
+*! tscb: Two-Stage Cluster Bootstrap (Abadie et al., 2022) Implementation
+*! Version 1.0.0 november6, 2022
+*! Author: Pailañir Daniel, Clarke Damian
+*! dpailanir@fen.uchile.cl, dclarke@fen.uchile.cl
+
 /*
-    tscb.ado computes the Two-Stage Cluster Bootstrap proposed by
-    Abadie, Athey, Imbens and Wooldridge (2022).
-	
-    This code works for the OLS estimator with the following specification:
-
-        Y - outcome variable
-        W - treatment variable (binary)
-        state - cluster variable and FE
+Versions:
 */
-
-mata: mata clear
 
 cap program drop tscb 
 program tscb, eclass
