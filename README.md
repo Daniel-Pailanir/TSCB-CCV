@@ -3,7 +3,7 @@
 # Two-Stage Cluster Bootstrap and Causal Cluster Variance for Stata
 
 ## TSCB: Two-Stage Cluster Bootstrap
-[tscb.ado](tscb.ado) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. We consider the case when $q_k=1$ and $\frac{1}{q_k}=c$ where $c$ can be an integer or not. We following algorithm 1 of [Abadie et al (2022)](#references).
+[tscb.ado](tscb.ado) - contain a post estimation program to compute the standard error for OLS and FE estimators. We consider the case when $q_k=1$ and $\frac{1}{q_k}=c$ where $c$ can be an integer or not. We following algorithm 1 of [Abadie et al (2022)](#references).
 
 We provide an example using the data availble from the paper:
 
@@ -58,21 +58,23 @@ Two-Stage Cluster Bootstrap (TSCB):
 ```
 
 ## CCV: Causal Cluster Variance
+[ccv.ado](ccv.ado) - contain a program to compute the standard error for OLS estimator (for the moment).
 
 ### OLS:
 ```
 use data.dta
 egen statenumber=group(state) //create a new id from 1 to N
-```
 
-* OLS
-```
-ccv Y W statenumber, qk(1) pk(1) seed(2022) reps(4)
+* run CCV
+ccv Y W statenumber, qk(1) pk(1) seed(2022) reps(8)
 ```
 The code returns the following results
 
 ```
-0.0036719694
+Causal Cluster Variance with (8) sample splits.
+----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5
+........
+Causal Cluster Variance (CCV):  0.00355
 ```
 
 ## References
