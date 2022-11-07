@@ -40,16 +40,28 @@ local M = "`3'"
 *-------------------------------------------------------------------------------
 cap set seed `seed'
 qui putmata data = (`1' `2' `3'), replace
-
 mata: ccv=J(`reps',1,.)
+
+dis "Causal Cluster Variance with (`reps') sample splits."
+dis "----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5"
+
 forval i=1/`reps' {
+    display in smcl "." _continue
+    if mod(`i',50)==0 dis "     `i'"
+
     cap drop split
     gen split = runiform()<=0.5
     qui putmata split = (split), replace
     mata: ccv[`i',1]=CCV(data[,1], data[,2], data[,3], split, `pk', `qk')
 }
 mata: n=rows(data)
-mata: sqrt((1/`reps')*sum(ccv[,1]))/sqrt(n)
+mata: ccv_se = sqrt((1/`reps')*sum(ccv[,1]))/sqrt(n)
+mata: st_local("ccv_se", strofreal(ccv_se))
+
+ereturn scalar se = `ccv_se' 
+
+di as text ""
+di as text "Causal Cluster Variance (CCV):" as result %9.5f `ccv_se'
 
 end
 
