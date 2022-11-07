@@ -1,13 +1,13 @@
 ![Stata](https://img.shields.io/badge/stata-2013-green) ![GitHub Starts](https://img.shields.io/github/stars/Daniel-Pailanir/tscb-ccv?style=social) ![GitHub license](https://img.shields.io/github/license/Daniel-Pailanir/sdid)
 
-# TSCB
-Two-Stage Cluster Bootstrap and Causal Cluster Variance: Stata package
+# Two-Stage Cluster Bootstrap and Causal Cluster Variance for Stata
 
+## TSCB: Two-Stage Cluster Bootstrap
 [tscb.ado](tscb.ado) - contain a small post estimation program to compute the standard error for simple OLS and FE estimators. We consider the case when $q_k=1$ and $\frac{1}{q_k}=c$ where $c$ can be an integer or not. We following algorithm 1 of [Abadie et al (2022)](#references).
 
 We provide an example using the data availble from the paper:
 
-## OLS:
+### OLS:
 ```
 use data.dta
 egen statenumber=group(state) //create a new id from 1 to N
@@ -34,7 +34,7 @@ Two-Stage Cluster Bootstrap (TSCB):
 ```
 
 
-## FE:
+### FE:
 ```
 * FE
 areg Y W, abs(statenumber)
@@ -57,11 +57,25 @@ Two-Stage Cluster Bootstrap (TSCB):
        _cons |  .0021086 
 ```
 
-# CCV
-CCV - work in progress
+## CCV: Causal Cluster Variance
 
+### OLS:
+```
+use data.dta
+egen statenumber=group(state) //create a new id from 1 to N
+```
 
-# References
+* OLS
+```
+ccv Y W statenumber, qk(1) pk(1) seed(2022) reps(4)
+```
+The code returns the following results
+
+```
+0.0036719694
+```
+
+## References
 **When Should You Adjust Standard Errors for Clustering?**, Alberto Abadie, Susan Athey, Guido W Imbens, Jeffrey M Wooldridge, The Quarterly Journal of Economics, 2022.
 
 
