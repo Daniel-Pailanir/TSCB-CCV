@@ -1,6 +1,5 @@
 *! ccv: Causal Cluster Variance (Abadie et al., 2022) Implementation
 *! Version 0.0.0 november7, 2022
-*! Author: Pailañir Daniel, Clarke Damian
 *! dpailanir@fen.uchile.cl, dclarke@fen.uchile.cl
 
 /*
