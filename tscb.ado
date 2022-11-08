@@ -1,6 +1,5 @@
 *! tscb: Two-Stage Cluster Bootstrap (Abadie et al., 2022) Implementation
 *! Version 1.0.0 november6, 2022
-*! Author: Pailañir Daniel, Clarke Damian
 *! dpailanir@fen.uchile.cl, dclarke@fen.uchile.cl
 
 /*
