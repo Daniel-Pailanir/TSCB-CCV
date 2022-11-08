@@ -41,13 +41,28 @@ cap set seed `seed'
 qui putmata data = (`1' `2' `3'), replace
 mata: ccv=J(`reps',1,.)
 
+// calculate tau FE
+mata: fe = FE(data[,1], data[,2], data[,3])
+mata: Wbar = mean(data[,2])
+
+// robust and cluster se FE
+mata: Ntot = rows(data)
+mata: tildes = auxsum(data[,1], data[,2], data[,3], fe)
+mata: rFE_V = Ntot*(tildes[1,1]/tildes[3,1]^2)
+mata: clusterFE_V = Ntot*(tildes[2,1]/tildes[3,1]^2)
+mata: Mk = rows(uniqrows(data[,3]))
+mata: lambdak = 1 - `qk'*((tildes[4,1]/Mk)^2/(tildes[5,1]/Mk))
+mata: CCV_FE_V = lambdak*clusterFE_V + (1 - lambdak)*rFE_V
+mata: ccv_se_fe = sqrt(CCV_FE_V)/sqrt(Ntot)
+mata: st_local("ccv_se_fe", strofreal(ccv_se_fe))
+
 dis "Causal Cluster Variance with (`reps') sample splits."
 dis "----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5"
 
 forval i=1/`reps' {
     display in smcl "." _continue
     if mod(`i',50)==0 dis "     `i'"
-
+	
     cap drop split
     gen split = runiform()<=0.5
     qui putmata split = (split), replace
@@ -57,10 +72,13 @@ mata: n=rows(data)
 mata: ccv_se = sqrt((1/`reps')*sum(ccv[,1]))/sqrt(n)
 mata: st_local("ccv_se", strofreal(ccv_se))
 
-ereturn scalar se = `ccv_se' 
+ereturn scalar se_ols = `ccv_se' 
+ereturn scalar se_fe = `ccv_se_fe' 
 
 di as text ""
-di as text "Causal Cluster Variance (CCV):" as result %9.5f `ccv_se'
+di as text "Causal Cluster Variance (CCV):" 
+di as text "OLS" as result %9.5f `ccv_se'
+di as text "FE " as result %9.5f `ccv_se_fe'
 
 end
 
@@ -91,7 +109,7 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
         u_m = select(u,cond)
         Nm = rows(y)
         ncount = ncount + Nm
-		tau_ms[m,1] = sum(y:*(w):*(1:-u_m))/sum((w):*(1:-u_m)) - sum(y:*(1:-w):*(1:-u_m))/sum((1:-w):*(1:-u_m))
+        tau_ms[m,1] = sum(y:*(w):*(1:-u_m))/sum((w):*(1:-u_m)) - sum(y:*(1:-w):*(1:-u_m))/sum((1:-w):*(1:-u_m))
         tau_full_ms = sum(y:*(w))/sum(w) - sum(y:*(1:-w))/sum(1:-w)
 		
         aux_pk = Nm*((tau_full_ms - tau)^2)
@@ -121,7 +139,7 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
         resu = select(resU,cond)
 		
         // tau
-	    tau_term = (tau_ms[m,1] - tau)*Wbar*(1-Wbar)
+        tau_term = (tau_ms[m,1] - tau)*Wbar*(1-Wbar)
 
         // Residual
         res_term = (w :- Wbar):*resu
@@ -143,4 +161,51 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
 }
 end
 
+mata:
+real scalar FE(vector Y, vector W, vector Cluster) {
+    A = (Y, W)
+    Acoll = _mm_collapse2(A, 1, Cluster)
+    //y = Y - Acoll[,1]
+    w = W - Acoll[,2]
+    tau_fe = sum(Y:*w)/sum(W:*w)
+    return(tau_fe)
+}
+end
+
+mata:
+real matrix auxsum(vector Y, vector W, vector M, scalar fe) {
+    sum_tildeU = 0
+    sum_tildeW = 0
+    sum_tildeU_FE = 0
+    num_lambdak = 0
+    den_lambdak = 0
+    T = J(5,1,.)
+	
+    uniqM = uniqrows(M)
+    NM = rows(uniqM)
+    for(m=1;m<=NM;++m) {
+        cond = M:==uniqM[m]
+        y = select(Y,cond)
+        w = select(W,cond)
+        Ym = mean(y)
+        Wmbar = mean(w)
+        Wtilde = w :- Wmbar
+        Utilde = y :- Ym :- (Wtilde:*fe)
+
+        sum_tildeU = sum_tildeU + sum((Wtilde:^2):*(Utilde:^2))
+        sum_tildeU_FE = sum_tildeU_FE + (sum(Wtilde:*Utilde))^2
+        sum_tildeW = sum_tildeW + sum(Wtilde:^2)
+		
+        num_lambdak = num_lambdak + Wmbar*(1-Wmbar)
+        den_lambdak = den_lambdak + (Wmbar^2)*((1-Wmbar)^2)
+    }
+	
+    T[1,1] = sum_tildeU
+    T[2,1] = sum_tildeU_FE
+    T[3,1] = sum_tildeW
+    T[4,1] = num_lambdak
+    T[5,1] = den_lambdak
+	return(T)
+}
+end
 
