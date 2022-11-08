@@ -58,7 +58,7 @@ Two-Stage Cluster Bootstrap (TSCB):
 ```
 
 ## CCV: Causal Cluster Variance
-[ccv.ado](ccv.ado) - A program to compute the standard error for OLS estimator (for the moment). 
+[ccv.ado](ccv.ado) - A program to compute the standard error for OLS and FE estimators. 
 
 ### OLS:
 ```
@@ -74,7 +74,9 @@ The code returns the following results
 Causal Cluster Variance with (8) sample splits.
 ----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5
 ........
-Causal Cluster Variance (CCV):  0.00355
+Causal Cluster Variance (CCV):
+OLS  0.00355
+FE   0.00138
 ```
 
 ## References
