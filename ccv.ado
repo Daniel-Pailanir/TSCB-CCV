@@ -68,8 +68,12 @@ forval i=1/`reps' {
     qui putmata split = (split), replace
     mata: ccv[`i',1]=CCV(data[,1], data[,2], data[,3], split, `pk', `qk')
 }
+
+// adjust for qk<1
+mata: ccv = ccv:*`qk' :+ (1-`qk')*clusterFE_V
+
 mata: n=rows(data)
-mata: ccv_se = sqrt((1/`reps')*sum(ccv[,1]))/sqrt(n)
+mata: ccv_se = sqrt((1/`reps')*sum(ccv))/sqrt(n)
 mata: st_local("ccv_se", strofreal(ccv_se))
 
 ereturn scalar se_ols = `ccv_se' 
@@ -205,7 +209,7 @@ real matrix auxsum(vector Y, vector W, vector M, scalar fe) {
     T[3,1] = sum_tildeW
     T[4,1] = num_lambdak
     T[5,1] = den_lambdak
-	return(T)
+    return(T)
 }
 end
 
