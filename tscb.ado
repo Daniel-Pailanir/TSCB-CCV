@@ -13,8 +13,8 @@ version 13.0
 #delimit ;
     syntax varlist(min=3 max=3), qk(numlist max=1 >0 <=1)
     [
-    seed(numlist integer >0 max=1)
-    reps(integer 50)
+        seed(numlist integer >0 max=1)
+        reps(integer 50)
     ]
     ;
 #delimit cr
@@ -22,16 +22,6 @@ version 13.0
 *------------------------------------------------------------------------------*
 * (0) Error checks in parsing
 *------------------------------------------------------------------------------*
-local commandline=e(cmdline)
-if "`commandline'"=="" {
-    di as error "estimate not found"
-}
-
-*local rank=e(rank)
-*local names : colfullnames e(b)
-local rank=2
-local names "W cons"
-
 local qm=1/`qk'
 if mod(`qm',1)==0 {
     if `qm'!=1 di as text "1/q is an integer, so we expand the data by `qm' for each cluster"
@@ -79,8 +69,8 @@ forval s=1/`S' {
 //bootstrap procedure
 local b=1
 cap set seed `seed'
-mata: Betas=J(`reps',`rank',.)
-mata: se=J(1,`rank',.)
+mata: ols=J(`reps',1,.)
+mata: fe=J(`reps',1,.)
 
 dis "Two-Stage Cluster Bootstrap replications (`reps')."
 dis "----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5"
@@ -125,31 +115,27 @@ while `b'<=`reps' {
     }
 	
     //run regression and save estimators
-    clear
-    getmata (`3' `1' `2')=SSTU
-    qui drop if `3'==.
-    qui `commandline'
-    local tau=_b[`2']
-    local c=_b[_cons]
-    *mata: Betas[`b',]=st_matrix("e(b)")
-    mata: Betas[`b',]=(`tau',`c')
+    mata: alpha = sum(SSTU[,2]:*(1:-SSTU[,3]))/sum(1:-SSTU[,3])
+    mata: ols[`b',] = sum(SSTU[,2]:*SSTU[,3])/sum(SSTU[,3]) - alpha
+	mata: fe[`b',] = FE(SSTU[,2], SSTU[,3], SSTU[,1])
+
     local ++b
 }
 restore
 
-forval i=1/`rank' {
-    mata: se[1,`i']=sqrt((`reps'-1)/`reps') * sqrt(variance(vec(Betas[,`i'])))
-}
+mata: tscb_ols = sqrt((`reps'-1)/`reps') * sqrt(variance(vec(ols)))
+mata: tscb_fe = sqrt((`reps'-1)/`reps') * sqrt(variance(vec(fe)))
 
-mata: st_matrix("se", se)
-mat coln se = `names'
-mat rown se = "Std. Err."
-ereturn matrix se se
+mata: st_local("tscb_ols", strofreal(tscb_ols))
+mata: st_local("tscb_fe", strofreal(tscb_fe))
+
+ereturn scalar se_ols = `tscb_ols' 
+ereturn scalar se_fe = `tscb_fe'
 
 di as text ""
 di as text "Two-Stage Cluster Bootstrap (TSCB):"
-
-matlist e(se)'
+di as text "OLS" as result %9.5f `tscb_ols'
+di as text "FE " as result %9.5f `tscb_fe'
 
 end
 
@@ -196,5 +182,14 @@ mata:
     s=sort(index,-1)[1..rs,2]
     return(s)
     }
+end
+
+mata:
+real scalar FE(vector Y, vector W, vector Cluster) {
+    Wmean = _mm_collapse2(W, 1, Cluster)
+    w = W - Wmean
+    tau_fe = sum(Y:*w)/sum(W:*w)
+    return(tau_fe)
+}
 end
 
