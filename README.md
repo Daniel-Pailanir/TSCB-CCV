@@ -7,13 +7,12 @@
 
 We provide an example using the data availble from the paper:
 
-### OLS:
+### OLS and FE
 ```
 use data.dta
 egen statenumber=group(state) //create a new id from 1 to N
 
-* OLS
-reg Y W
+* run TSCB
 tscb Y W statenumber, qk(1) seed(2022) reps(150)
 ```
 The code returns the following results
@@ -26,41 +25,15 @@ Two-Stage Cluster Bootstrap replications (150).
 ..................................................     150
 
 Two-Stage Cluster Bootstrap (TSCB):
-
-             | Std. Err. 
--------------+-----------
-           W |  .0036182 
-       _cons |  .0030679 
+OLS  0.00362
+FE   0.00144
 ```
 
-
-### FE:
-```
-* FE
-areg Y W, abs(statenumber)
-tscb Y W statenumber, qk(1) seed(2022) reps(150)
-```
-The code returns the following results
-
-```
-Two-Stage Cluster Bootstrap replications (150).
-----+--- 1 ---+--- 2 ---+--- 3 ---+--- 4 ---+--- 5
-..................................................     50
-..................................................     100
-..................................................     150
-
-Two-Stage Cluster Bootstrap (TSCB):
-
-             | Std. Err. 
--------------+-----------
-           W |  .0014387 
-       _cons |  .0021086 
-```
 
 ## CCV: Causal Cluster Variance
 [ccv.ado](ccv.ado) - A program to compute the standard error for OLS and FE estimators. 
 
-### OLS:
+### OLS and FE
 ```
 use data.dta
 egen statenumber=group(state) //create a new id from 1 to N
