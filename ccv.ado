@@ -3,8 +3,7 @@
 *! dpailanir@fen.uchile.cl, dclarke@fen.uchile.cl
 
 /*
-Versions:
-
+Versions: 0.0.1 november14 - add if/in and create unique id in ccv
 */
 
 
@@ -14,7 +13,7 @@ version 13.0
 
 
 #delimit ;
-    syntax varlist(min=3 max=3),
+    syntax varlist(min=3 max=3) [if] [in],
         qk(numlist max=1 >0 <=1) 
         pk(numlist max=1 >0 <=1)
         [
@@ -27,18 +26,17 @@ tokenize `varlist'
 *-------------------------------------------------------------------------------
 *--- (0) Error checks and unpack parsing
 *-------------------------------------------------------------------------------
-local Y = "`1'"
-local W = "`2'"
-local M = "`3'"
-*reg `Y' `W', cluster(`M')
+tempvar touse
+mark `touse' `if' `in'
 
-
+tempvar M
+qui egen `M' = group(`3') if `touse'
 
 *-------------------------------------------------------------------------------
 *--- (1) Run CCV
 *-------------------------------------------------------------------------------
 cap set seed `seed'
-qui putmata data = (`1' `2' `3'), replace
+qui putmata data = (`1' `2' `M') if `touse', replace
 mata: ccv=J(`reps',1,.)
 
 // calculate tau FE
@@ -63,9 +61,9 @@ forval i=1/`reps' {
     display in smcl "." _continue
     if mod(`i',50)==0 dis "     `i'"
 	
-    cap drop split
-    gen split = runiform()<=0.5
-    qui putmata split = (split), replace
+    tempvar split
+    qui gen `split' = runiform()<=0.5 if `touse'
+    qui putmata split = (`split') if `touse', replace
     mata: ccv[`i',1]=CCV(data[,1], data[,2], data[,3], split, `pk', `qk')
 }
 
@@ -92,15 +90,12 @@ end
 mata: 
 real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
     // u is split variable: 1 if estimation, 0 if calculate    
-
     //Calculate alpha and tau for split 1 [NEED TO CONFIRM IF FASTER TO JUST SELECT SUB-VECTORS!]
     alpha = sum(Y:*(1:-W):*(1:-u))/sum((1:-W):*(1:-u))
     tau = sum(Y:*(W):*(1:-u))/sum((W):*(1:-u)) - alpha
-
     // Calculate tau for full sample
     tau_full = sum(Y:*(W))/sum(W) - sum(Y:*(1:-W))/sum(1:-W)
-
-    //Calculate pk term [UNDER CONSTRUCTION]
+    //Calculate pk term
     pk_term = 0
     ncount = 0
     uniqM = uniqrows(M)
@@ -121,19 +116,14 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
     }
     // Calculate residual
     resU = Y :- alpha :- W:*tau
-
     // Wbar
     Wbar = sum(W:*(1:-u))/(sum((1:-W):*(1:-u)) + sum((W):*(1:-u)))
-
     // pk
     pk_term = pk_term*(1-pk)/ncount
-    
     // Calculate avg Z
     Zavg = sum(u)/ncount
-	
     // Calculate the normalized CCV using second split
     n = ncount*(Wbar^2)*((1-Wbar)^2)
-
     sum_CCV = 0
     for(m=1;m<=NM;++m) {
         cond = M:==uniqM[m]
@@ -144,16 +134,12 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
 		
         // tau
         tau_term = (tau_ms[m,1] - tau)*Wbar*(1-Wbar)
-
         // Residual
         res_term = (w :- Wbar):*resu
-
         // square of sums
         sq_sum = (sum(res_term :- tau_term))^2
-
         // sum of squares
         sum_sq = sum((res_term :- tau_term):^2)
-
         // Calculate CCV
         sum_CCV = sum_CCV+(1/(Zavg^2))*sq_sum-((1-Zavg)/(Zavg^2))*sum_sq+n*pk_term
     }
@@ -167,10 +153,11 @@ end
 
 mata:
 real scalar FE(vector Y, vector W, vector Cluster) {
-    A = (Y, W)
-    Acoll = _mm_collapse2(A, 1, Cluster)
+    //A = (Y, W)
+    //Acoll = _mm_collapse2(A, 1, Cluster)
     //y = Y - Acoll[,1]
-    w = W - Acoll[,2]
+    Wmean = _mm_collapse2(W, 1, Cluster)
+    w = W - Wmean
     tau_fe = sum(Y:*w)/sum(W:*w)
     return(tau_fe)
 }
@@ -195,7 +182,6 @@ real matrix auxsum(vector Y, vector W, vector M, scalar fe) {
         Wmbar = mean(w)
         Wtilde = w :- Wmbar
         Utilde = y :- Ym :- (Wtilde:*fe)
-
         sum_tildeU = sum_tildeU + sum((Wtilde:^2):*(Utilde:^2))
         sum_tildeU_FE = sum_tildeU_FE + (sum(Wtilde:*Utilde))^2
         sum_tildeW = sum_tildeW + sum(Wtilde:^2)
