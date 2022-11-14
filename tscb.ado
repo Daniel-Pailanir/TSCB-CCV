@@ -3,7 +3,7 @@
 *! dpailanir@fen.uchile.cl, dclarke@fen.uchile.cl
 
 /*
-Versions:
+Versions: add if/in and create unique id in tscb
 */
 
 cap program drop tscb 
@@ -11,7 +11,7 @@ program tscb, eclass
 version 13.0
 
 #delimit ;
-    syntax varlist(min=3 max=3), qk(numlist max=1 >0 <=1)
+    syntax varlist(min=3 max=3) [if] [in], qk(numlist max=1 >0 <=1)
     [
         seed(numlist integer >0 max=1)
         reps(integer 50)
@@ -22,6 +22,9 @@ version 13.0
 *------------------------------------------------------------------------------*
 * (0) Error checks in parsing
 *------------------------------------------------------------------------------*
+tempvar touse
+mark `touse' `if' `in'
+
 local qm=1/`qk'
 if mod(`qm',1)==0 {
     if `qm'!=1 di as text "1/q is an integer, so we expand the data by `qm' for each cluster"
@@ -37,9 +40,11 @@ if mod(`qm',1)!=0 {
 *------------------------------------------------------------------------------*
 * (1) Run TSCB
 *------------------------------------------------------------------------------*
-tokenize `varlist'  //1 outputvar, 2 treatmentvar, 3 clustervar
+tokenize `varlist'
+tempvar M
+qui egen `M' = group(`3') if `touse'
 
-qui levelsof `3'
+qui levelsof `M'
 local rs=r(r)
 local S=`rs'*`qm'
 
@@ -50,7 +55,7 @@ local m=0
 forval r=1/`qm' {
     if `r'>1 local ++m
     forval s=1/`rs' {
-        qui putmata S`i'=(`3' `1' `2') if `3'==`s', replace
+        qui putmata S`i'=(`M' `1' `2') if `M'==`s' & `touse', replace
         mata: States[`i'] = &(S`i')
         if `i'>`s' {
             mata: (*States[`i'])[,1] = (*States[`i'])[,1]:+`m'*`rs'
@@ -95,16 +100,16 @@ while `b'<=`reps' {
     }
     else {
         local upperS=`rs'
-        local M=`S'
+        local C=`S'
 		
         if mod(1/`qk',1)!=0 {
             mata: ud=rdiscrete(1, 1, (`alpha',1-`alpha'))
             mata: st_local("ud", strofreal(ud))
-            if `ud'==1 local M=`f'*`rs'
-            else       local M=`qm'*`rs'		
+            if `ud'==1 local C=`f'*`rs'
+            else       local C=`qm'*`rs'		
         }
 		
-        mata: newi=sort(SSelect(`M', `rs', Data[1..`M',1]),1)
+        mata: newi=sort(SSelect(`C', `rs', Data[1..`M',1]),1)
     }
 
     forval i=1/`upperS' {		
