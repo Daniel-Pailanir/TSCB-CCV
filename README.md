@@ -36,7 +36,6 @@ FE   0.00144
 ### OLS and FE
 ```
 use data.dta
-egen statenumber=group(state) //create a new id from 1 to N
 
 * run CCV
 ccv Y W statenumber, qk(1) pk(1) seed(2022) reps(8)
