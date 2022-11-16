@@ -7,4 +7,3 @@ d 'tscb': Two-Stage Cluster Bootstrap
 d 'ccv': Causal Cluster Variance
 
 p tscb
-p ccv
