@@ -14,8 +14,10 @@
 {synoptset 29 tabbed}{...}
 {synopthdr}
 {synoptline}
+{synopt :{opt qk}({it:#})} proportion of cluster from population.{p_end}
+{synopt :{opt pk}({it:#})} proportion of population from a given cluster k sampled.{p_end}
 {synopt :{opt seed}({it:#})} set random-number seed to #.{p_end}
-{synopt :{opt reps}({it:#})} repetitions...{p_end}
+{synopt :{opt reps}({it:#})} repetition of sample splits.{p_end}
 {pstd}
 {p_end}
 {synoptline}
@@ -27,7 +29,7 @@
 {pstd}
 
 {pstd}
- {cmd:ccv}  {help ccv##CCV:Abadie et al. (2022)}.
+ {cmd:ccv} implements the Causal Cluster Variance (CCV) an analytic variance formula {help ccv##CCV:Abadie et al. (2022)}. The CCV correct the bias of the conventional cluster variance using the error of the least squares estimator, the robust variance estimator and the cluster variance estimator.
 {p_end}
 
 
@@ -35,12 +37,22 @@
 {title:Options}
 {dlgtab:Main}
 {phang}
+{opt qk}({it:#}) proportion of cluster from population. This is required.
+
+{pstd}
+{p_end}
+{phang}
+{opt pk}({it:#}) proportion of population from a given cluster k sampled. This is required.
+
+{pstd}
+{p_end}
+{phang}
 {opt seed}({it:#}) seed define for pseudo-random numbers.
 
 {pstd}
 {p_end}
 {phang}
-{opt reps}({it:#}) repetitions for
+{opt reps}({it:#}) repetition of sample splits. Default is 4.
 
 {pstd}
 {p_end}
@@ -50,13 +62,13 @@
 
 {synoptset 15 tabbed}{...}
 
-{cmd:sdid} stores the following in {cmd:e()}:
+{cmd:ccv} stores the following in {cmd:e()}:
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Scalars}{p_end}
-{synopt:{cmd:e(se_ols)}}Standard error {p_end}
-{synopt:{cmd:e(se_fe)}}Standard error {p_end}
-{synopt:{cmd:e(reps)}}Number of  {p_end}
+{synopt:{cmd:e(se_ols)}}Standard error of the OLS estimator {p_end}
+{synopt:{cmd:e(se_fe)}}Standard error of the FE estimator {p_end}
+{synopt:{cmd:e(reps)}}Number of sample splits {p_end}
 {synopt:{cmd:e(N_clust)}}Number of clusters {p_end}
 
 

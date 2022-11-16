@@ -14,8 +14,9 @@
 {synoptset 29 tabbed}{...}
 {synopthdr}
 {synoptline}
+{synopt :{opt qk}({it:#})} proportion of cluster from population.{p_end}
 {synopt :{opt seed}({it:#})} set random-number seed to #.{p_end}
-{synopt :{opt reps}({it:#})} repetitions...{p_end}
+{synopt :{opt reps}({it:#})} repetitions for bootstrap.{p_end}
 {pstd}
 {p_end}
 {synoptline}
@@ -27,7 +28,7 @@
 {pstd}
 
 {pstd}
- {cmd:tscb}  {help tscb##TSCB:Abadie et al. (2022)}.
+ {cmd:tscb} implements the Two-Stage Cluster Bootstrap Estimator (TSCB) {help tscb##TSCB:Abadie et al. (2022)}. The TSCB work in two stages. First, the fraction treated for each cluster is drawn from empirical distribution of cluster-specific treatment fraction. Second, we samples the treated and control units from each cluster, with their number of units determined in the first stage. The algorithm is explained in detail in {help tscb##TSCB:Abadie et al. (2022)}.
 {p_end}
 
 
@@ -35,12 +36,17 @@
 {title:Options}
 {dlgtab:Main}
 {phang}
+{opt qk}({it:#}) proportion of cluster from population. This is required.
+
+{pstd}
+{p_end}
+{phang}
 {opt seed}({it:#}) seed define for pseudo-random numbers.
 
 {pstd}
 {p_end}
 {phang}
-{opt reps}({it:#}) repetitions for
+{opt reps}({it:#}) repetition of bootstrap. Default is 50.
 
 {pstd}
 {p_end}
@@ -50,18 +56,18 @@
 
 {synoptset 15 tabbed}{...}
 
-{cmd:sdid} stores the following in {cmd:e()}:
+{cmd:tscb} stores the following in {cmd:e()}:
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Scalars}{p_end}
-{synopt:{cmd:e(se_ols)}}Standard error {p_end}
-{synopt:{cmd:e(se_fe)}}Standard error {p_end}
-{synopt:{cmd:e(reps)}}Number of  {p_end}
+{synopt:{cmd:e(se_ols)}}Standard error of the OLS estimator{p_end}
+{synopt:{cmd:e(se_fe)}}Standard error of the FE estimator {p_end}
+{synopt:{cmd:e(reps)}}Number of bootstrap {p_end}
 {synopt:{cmd:e(N_clust)}}Number of clusters {p_end}
 
 
 {synoptset 20 tabbed}{...}
-{p2col 5 20 24 2: Macros}{p_end}
+{p2col 5 20 24 2: Macros}{p_end} 
 {synopt:{cmd:e(cmd)}}tscb{p_end}
 {synopt:{cmd:e(cmdline)}}command as typed{p_end}
 {synopt:{cmd:e(depvar)}}name of dependent variable{p_end}
@@ -84,3 +90,5 @@
 
 
 {title:Author}
+
+
