@@ -5,12 +5,16 @@
 ## TSCB: Two-Stage Cluster Bootstrap
 [tscb.ado](tscb.ado) - A post estimation program to compute the standard error for OLS and FE estimators. We consider the case when $q_k=1$ and $\frac{1}{q_k}=c$ where $c$ can take integer or non-integer values. We follow algorithm 1 of [Abadie et al (2022)](#references).
 
-We provide an example using the data availble from the paper:
+### Syntax
+```s
+tscb Y W M [if] [in], qk() seed() reps()
+```
+
+Where Y is an outcome variable, W a binary treatment variable and M a variable indicating the cluster. We provide an example using the data availble from the paper:
 
 ### OLS and FE
-```
-use data.dta
-egen statenumber=group(state) //create a new id from 1 to N
+```s
+use "data.dta"
 
 * run TSCB
 tscb Y W statenumber, qk(1) seed(2022) reps(150)
@@ -33,9 +37,16 @@ FE   0.00144
 ## CCV: Causal Cluster Variance
 [ccv.ado](ccv.ado) - A program to compute the standard error for OLS and FE estimators. 
 
-### OLS and FE
+### Syntax
+```s
+ccv Y W M [if] [in], qk() pk() seed() reps()
 ```
-use data.dta
+
+Where Y is an outcome variable, W a binary treatment variable and M a variable indicating the cluster. We provide an example using the data availble from the paper:
+
+### OLS and FE
+```s
+use "data.dta"
 
 * run CCV
 ccv Y W statenumber, qk(1) pk(1) seed(2022) reps(8)
