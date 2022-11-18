@@ -108,8 +108,15 @@ real scalar CCV(vector Y, vector W, vector M, vector u, scalar pk, scalar qk) {
         u_m = select(u,cond)
         Nm = rows(y)
         ncount = ncount + Nm
-        tau_ms[m,1] = sum(y:*(w):*(1:-u_m))/sum((w):*(1:-u_m)) - sum(y:*(1:-w):*(1:-u_m))/sum((1:-w):*(1:-u_m))
-        tau_full_ms = sum(y:*(w))/sum(w) - sum(y:*(1:-w))/sum(1:-w)
+
+        if (variance(vec(w))==0) {
+            tau_ms[m,1] = tau
+            tau_full_ms = tau_full
+        }
+        else {
+            tau_ms[m,1] = sum(y:*(w):*(1:-u_m))/sum((w):*(1:-u_m)) - sum(y:*(1:-w):*(1:-u_m))/sum((1:-w):*(1:-u_m))
+            tau_full_ms = sum(y:*(w))/sum(w) - sum(y:*(1:-w))/sum(1:-w)
+        }
 		
         aux_pk = Nm*((tau_full_ms - tau)^2)
         pk_term = pk_term + aux_pk
