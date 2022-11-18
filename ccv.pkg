@@ -1,0 +1,8 @@
+v 1.0.0
+d 'CCV': Causal Cluster Variance
+d 
+d Distribution-Date:   2022-11-16
+d License: GNU v3.0
+d 
+F ccv.ado
+F ccv.sthlp
